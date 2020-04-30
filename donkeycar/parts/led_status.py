@@ -1,5 +1,6 @@
 import time
 import RPi.GPIO as GPIO
+from donkeycar.parts.actuator import PCA9685
 
 class LED:
     ''' 
@@ -7,6 +8,7 @@ class LED:
     '''
     def __init__(self, pin):
         self.pin = pin
+        print('run class LED **************')
 
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.pin, GPIO.OUT)
@@ -50,6 +52,11 @@ class RGB_LED:
         self.pin_b = pin_b
         self.invert = invert_flag
         print('setting up gpio in board mode')
+        self.Led_green  = PCA9685(4)
+        self.Led_yellow = PCA9685(5)
+        #self.Led_green.pwm.set_pwm_freq(30)
+        self.Led_red    = PCA9685(6)
+
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.pin_r, GPIO.OUT)
@@ -86,6 +93,9 @@ class RGB_LED:
             self.blink_changed = time.time()
 
     def run(self, blink_rate):
+        self.Led_green.set_pulse(4095)        
+        self.Led_red.set_pulse(4095)        
+        self.Led_yellow.set_pulse(4095)        
         if blink_rate == 0:
             self.toggle(False)
         elif blink_rate > 0:
@@ -101,6 +111,9 @@ class RGB_LED:
         self.set_rgb_duty(r, g, b)
 
     def set_rgb_duty(self, r, g, b):
+        self.Led_red.set_pulse(r)        
+        self.Led_yellow.set_pulse(b)        
+        self.Led_green.set_pulse(g)        
         self.pwm_r.ChangeDutyCycle(r)
         self.pwm_g.ChangeDutyCycle(g)
         self.pwm_b.ChangeDutyCycle(b)
